@@ -26,13 +26,16 @@ std::string getPythonInterpreterStackTrace() {
   std::stringstream stack_trace;
   AutoGIL gil;
   PyFrameObject* frame = PyEval_GetFrame();
-  while (nullptr != frame) {
-    int line = PyCode_Addr2Line(frame->f_code, frame->f_lasti);
+  // FIXME hacky way to just make it compile
+  // TODO proper PyPy implementation
+  // while (nullptr != frame) {
+    // int line = PyCode_Addr2Line(frame->f_code, frame->f_lasti);
     std::string filename = THPUtils_unpackString(frame->f_code->co_filename);
     std::string funcname = THPUtils_unpackString(frame->f_code->co_name);
-    stack_trace << filename << "(" << line << "): " << funcname << "\n";
-    frame = frame->f_back;
-  }
+    // stack_trace << filename << "(" << line << "): " << funcname << "\n";
+    stack_trace << filename << ": " << funcname << "\n";
+    // frame = frame->f_back;
+  //}
   return stack_trace.str();
 }
 
