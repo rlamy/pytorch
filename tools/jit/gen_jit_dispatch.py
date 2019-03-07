@@ -449,7 +449,7 @@ def match_signature(decl, constructed_string, should_match_schema):
 
 def signature(decl, should_match_schema=True):
     def format_arg(arg):
-        name = arg['name'] if not arg.get('output') else 'out'
+        name = arg['name']
         typ = jit_type_of(arg)
         decl = '{} {}'.format(typ, name)
         if 'default' in arg:
@@ -482,7 +482,9 @@ def signature(decl, should_match_schema=True):
     if len(decl['returns']) == 1:
         ret_list = jit_type_of(decl['returns'][0])
     else:
-        ret_list = '({})'.format(', '.join(jit_type_of(r) for r in decl['returns']))
+        def type_maybe_field(r):
+            return '{} {}'.format(jit_type_of(r), r['field_name']) if 'field_name' in r else jit_type_of(r)
+        ret_list = '({})'.format(', '.join(type_maybe_field(r) for r in decl['returns']))
     name = decl['name'] if not is_out_variant(decl) else decl['name'][:-4]
     constructed_string = 'aten::{}({}) -> {}'.format(name, arg_list, ret_list)
     return match_signature(decl, constructed_string, should_match_schema)
